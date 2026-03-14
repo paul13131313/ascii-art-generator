@@ -1,0 +1,21 @@
+{
+  "name": "ASCII Art Generator",
+  "short_name": "ASCII Art",
+  "description": "写真を高密度文字配列アートに変換",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F0E8",
+  "theme_color": "#1a1a1a",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
