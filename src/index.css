@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+}
+
+:root {
+  --bg: #F5F0E8;
+  --bg-dark: #EDE8DF;
+  --text: #1a1a1a;
+  --text-muted: #6b6b6b;
+  --accent: #333;
+  --border: #d4cfc6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Courier New', 'Consolas', monospace;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* ASCII art preview container */
+.ascii-preview {
+  font-family: 'Courier New', monospace;
+  line-height: 1.0;
+  letter-spacing: 0px;
+  white-space: pre;
+  overflow: auto;
+  background: #fff;
+}
+
+.ascii-preview-color span {
+  line-height: 1.0;
+}
+
+/* Upload area */
+.upload-area {
+  border: 2px dashed var(--border);
+  transition: all 0.2s ease;
+}
+
+.upload-area:hover,
+.upload-area.drag-over {
+  border-color: var(--accent);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* Slider styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+
+/* Button styling */
+.btn {
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.15s ease;
+}
+
+.btn-primary {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.btn-primary:hover {
+  background: #333;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  border: 2px solid var(--text);
+}
+
+.btn-secondary:hover {
+  background: var(--text);
+  color: var(--bg);
+}
+
+/* Scrollbar */
+.ascii-preview::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.ascii-preview::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+
+.ascii-preview::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
