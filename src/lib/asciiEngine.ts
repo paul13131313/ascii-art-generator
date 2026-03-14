@@ -40,14 +40,51 @@ function brightnessToChar(brightness: number, chars: string): string {
   return chars[index]
 }
 
-// Apply contrast adjustment
-// contrast 1.0 = no change, <1.0 = less contrast, >1.0 = more contrast
-function applyContrast(value: number, contrast: number): number {
-  // Simple power curve: contrast as gamma correction
-  // contrast 1.0 = unchanged, 0.5 = flatter, 2.0 = steeper
-  const normalized = value / 255
-  const adjusted = Math.pow(normalized, 1 / contrast)
-  return Math.max(0, Math.min(255, adjusted * 255))
+// S-curve contrast enhancement
+// strength 1.0 = no change, >1.0 = more contrast (steeper S-curve)
+function sCurve(value: number, strength: number): number {
+  const x = value / 255
+  // Sigmoid-based S-curve centered at 0.5
+  // strength controls how steep the curve is
+  const k = strength * 5 // scale factor
+  const s = 1 / (1 + Math.exp(-k * (x - 0.5)))
+  // Normalize sigmoid output to 0-1 range
+  const sMin = 1 / (1 + Math.exp(-k * (0 - 0.5)))
+  const sMax = 1 / (1 + Math.exp(-k * (1 - 0.5)))
+  const normalized = (s - sMin) / (sMax - sMin)
+  return Math.max(0, Math.min(255, normalized * 255))
+}
+
+// Histogram normalization: stretch brightness to use full 0-255 range
+// Clips the bottom/top percentiles to handle outliers
+function normalizeHistogram(
+  grid: PixelData[][],
+  rows: number,
+  cols: number
+): void {
+  // Collect all brightness values
+  const values: number[] = []
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      values.push(grid[r][c].brightness)
+    }
+  }
+  values.sort((a, b) => a - b)
+
+  // Clip at 2% / 98% percentile to ignore outliers
+  const clipLow = Math.floor(values.length * 0.02)
+  const clipHigh = Math.floor(values.length * 0.98)
+  const minVal = values[clipLow]
+  const maxVal = values[clipHigh]
+  const range = maxVal - minVal || 1
+
+  // Stretch brightness to full 0-255 range
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const stretched = ((grid[r][c].brightness - minVal) / range) * 255
+      grid[r][c].brightness = Math.max(0, Math.min(255, stretched))
+    }
+  }
 }
 
 // Sobel edge detection
@@ -148,12 +185,21 @@ export function convertToAscii(
       const g = gSum / count
       const b = bSum / count
       // Perceived brightness (luminance formula)
-      let brightness = 0.299 * r + 0.587 * g + 0.114 * b
-      brightness = applyContrast(brightness, contrast)
+      const brightness = 0.299 * r + 0.587 * g + 0.114 * b
 
       pixelRow.push({ r, g, b, brightness })
     }
     pixelGrid.push(pixelRow)
+  }
+
+  // Step 1: Histogram normalization (auto black/white point)
+  normalizeHistogram(pixelGrid, charHeight, charWidth)
+
+  // Step 2: S-curve contrast enhancement
+  for (let row = 0; row < charHeight; row++) {
+    for (let col = 0; col < charWidth; col++) {
+      pixelGrid[row][col].brightness = sCurve(pixelGrid[row][col].brightness, contrast)
+    }
   }
 
   // Generate ASCII
