@@ -33,16 +33,21 @@ function getCharSet(charSet: CharSetKey | string): string {
 }
 
 // Map brightness (0-255) to a character
+// Character sets: index 0 = densest ($@B%), last index = lightest (space)
+// brightness 0 (dark) → index 0 (dense), brightness 255 (bright) → last index (space)
 function brightnessToChar(brightness: number, chars: string): string {
   const index = Math.floor((brightness / 255) * (chars.length - 1))
-  return chars[chars.length - 1 - index] // reverse: dark chars for low brightness
+  return chars[index]
 }
 
 // Apply contrast adjustment
+// contrast 1.0 = no change, <1.0 = less contrast, >1.0 = more contrast
 function applyContrast(value: number, contrast: number): number {
-  const factor = (259 * (contrast * 128 + 255)) / (255 * (259 - contrast * 128))
-  const result = factor * (value - 128) + 128
-  return Math.max(0, Math.min(255, result))
+  // Simple power curve: contrast as gamma correction
+  // contrast 1.0 = unchanged, 0.5 = flatter, 2.0 = steeper
+  const normalized = value / 255
+  const adjusted = Math.pow(normalized, 1 / contrast)
+  return Math.max(0, Math.min(255, adjusted * 255))
 }
 
 // Sobel edge detection
