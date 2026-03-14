@@ -41,12 +41,11 @@ function brightnessToChar(brightness: number, chars: string): string {
 }
 
 // S-curve contrast enhancement
-// strength 1.0 = no change, >1.0 = more contrast (steeper S-curve)
+// strength 1.0 = gentle enhancement, >1.0 = stronger, 0.5 = nearly flat
 function sCurve(value: number, strength: number): number {
   const x = value / 255
-  // Sigmoid-based S-curve centered at 0.5
-  // strength controls how steep the curve is
-  const k = strength * 5 // scale factor
+  // Gentler sigmoid: k=3 at strength 1.0 (was k=5, too harsh)
+  const k = strength * 3
   const s = 1 / (1 + Math.exp(-k * (x - 0.5)))
   // Normalize sigmoid output to 0-1 range
   const sMin = 1 / (1 + Math.exp(-k * (0 - 0.5)))
